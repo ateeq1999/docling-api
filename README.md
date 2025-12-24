@@ -94,6 +94,30 @@ Docling auto-selects the best available OCR engine:
 
 The "RapidOCR returned empty result" warnings are normal for pages without scanned text.
 
+## Frontend
+
+A React test client is included in the `frontend/` directory.
+
+### Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 to test all API endpoints.
+
+### Features
+
+- Single file processing (all formats)
+- Streaming responses
+- Per-page streaming
+- Server-Sent Events (SSE)
+- Bulk file processing
+- Image extraction
+- Health checks
+
 ## License
 
 MIT
