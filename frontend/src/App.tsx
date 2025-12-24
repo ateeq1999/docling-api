@@ -1,45 +1,28 @@
 import { QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { queryClient } from "./lib/query-client";
-import { HealthCheck } from "./features/health/HealthCheck";
-import { DocumentProcessor } from "./features/documents/DocumentProcessor";
-import { BulkProcessor } from "./features/documents/BulkProcessor";
-import { ImageExtractor } from "./features/images/ImageExtractor";
-import { ResultDisplay } from "./components/ResultDisplay";
-import { useAppStore } from "./lib/store";
-import "./App.css";
-
-function AppContent() {
-  const { file, isStreaming } = useAppStore();
-
-  return (
-    <div className="container">
-      <h1>📄 Docling API Tester</h1>
-
-      <HealthCheck />
-
-      <DocumentProcessor />
-
-      <section className="extras-section">
-        <h2>Additional Actions</h2>
-        <div className="button-group">
-          <ImageExtractor />
-        </div>
-        {!file && <p className="hint">Select a file above to enable image extraction</p>}
-      </section>
-
-      <BulkProcessor />
-
-      {isStreaming && <div className="loading">Processing...</div>}
-
-      <ResultDisplay />
-    </div>
-  );
-}
+import { DashboardLayout } from "./layouts/DashboardLayout";
+import { DashboardPage } from "./pages/DashboardPage";
+import { ProcessPage } from "./pages/ProcessPage";
+import { BulkPage } from "./pages/BulkPage";
+import { ImagesPage } from "./pages/ImagesPage";
+import { HistoryPage } from "./pages/HistoryPage";
+import "./index.css";
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppContent />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<DashboardLayout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="process" element={<ProcessPage />} />
+            <Route path="bulk" element={<BulkPage />} />
+            <Route path="images" element={<ImagesPage />} />
+            <Route path="history" element={<HistoryPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }
