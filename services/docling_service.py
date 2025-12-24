@@ -2,10 +2,11 @@ import asyncio
 import json
 import tempfile
 from pathlib import Path
-from typing import AsyncGenerator, Tuple
+from typing import Tuple
 
 from fastapi import UploadFile, HTTPException
 from docling.document_converter import DocumentConverter
+from docling.exceptions import ConversionError
 
 from core.config import MAX_FILE_SIZE_BYTES
 
@@ -21,21 +22,23 @@ async def validate_file_size(file: UploadFile) -> None:
     while data := await file.read(chunk):
         size += len(data)
         if size > MAX_FILE_SIZE_BYTES:
-            raise HTTPException(
-                status_code=413,
-                detail="File too large",
-            )
+            raise HTTPException(status_code=413, detail="File too large")
 
     await file.seek(0)
 
 
 # -------------------------
-# Blocking Docling execution
+# Blocking conversion
 # -------------------------
 
 def _convert(path: Path, output_format: str) -> str:
     converter = DocumentConverter()
-    result = converter.convert(str(path))
+
+    try:
+        result = converter.convert(str(path))
+    except ConversionError as e:
+        raise ValueError(f"Invalid or unsupported document: {e}")  # FIX
+
     doc = result.document
 
     if output_format == "text":
@@ -52,17 +55,6 @@ def _convert(path: Path, output_format: str) -> str:
 
 
 # -------------------------
-# Streaming generator
-# -------------------------
-
-async def stream_text(content: str) -> AsyncGenerator[bytes, None]:
-    size = 2048
-    for i in range(0, len(content), size):
-        yield content[i : i + size].encode()
-        await asyncio.sleep(0)
-
-
-# -------------------------
 # Non-streaming API
 # -------------------------
 
@@ -70,35 +62,42 @@ async def process_document(
     file: UploadFile,
     output_format: str,
 ) -> Tuple[str, str]:
-    """
-    Returns full content (non-streaming)
-    """
 
     await validate_file_size(file)
 
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        path = Path(tmp.name)
+    # FIX: create temp file manually and CLOSE it before conversion
+    tmp = tempfile.NamedTemporaryFile(delete=False)
+    tmp_path = Path(tmp.name)
+
+    try:
+        while chunk := await file.read(1024 * 1024):
+            tmp.write(chunk)
+
+        tmp.close()  # 🔥 CRITICAL FIX FOR WINDOWS
 
         try:
-            while chunk := await file.read(1024 * 1024):
-                tmp.write(chunk)
-
             content = await asyncio.to_thread(
                 _convert,
-                path,
+                tmp_path,
                 output_format,
             )
+        except ValueError as e:
+            raise HTTPException(status_code=422, detail=str(e))
 
-            media_type = (
-                "application/json"
-                if output_format == "json"
-                else "text/plain"
-            )
+        media_type = (
+            "application/json"
+            if output_format == "json"
+            else "text/plain"
+        )
 
-            return content, media_type
+        return content, media_type
 
-        finally:
-            path.unlink(missing_ok=True)
+    finally:
+        # FIX: delete ONLY after conversion completes
+        try:
+            tmp_path.unlink()
+        except Exception:
+            pass
 
 
 # -------------------------
