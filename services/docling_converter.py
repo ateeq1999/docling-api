@@ -55,7 +55,7 @@ def create_converter() -> DocumentConverter:
     if OCR_ENABLED:
         pipeline_options.ocr_options = RapidOcrOptions(
             lang=OCR_LANGUAGES,
-            use_gpu=False,
+            backend="torch",
         )
 
     return DocumentConverter(
