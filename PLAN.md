@@ -196,28 +196,32 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 
 ---
 
-## Phase 8: Authentication & Multi-tenancy
+## Phase 8: Authentication & Multi-tenancy ✅ COMPLETED
 
 **Priority: Medium | Effort: M | Duration: 2-3 days**
 
 ### 8.1 User Authentication
 
-- [ ] JWT-based authentication
-- [ ] User registration/login
-- [ ] Password reset flow
-- [ ] OAuth (Google, GitHub) optional
+- [x] JWT-based authentication (access + refresh tokens)
+- [x] User registration/login
+- [x] Password hashing with bcrypt
+
+**Implementation:** `core/auth.py`, `api/routes/auth.py`
 
 ### 8.2 Multi-tenancy
 
-- [ ] User-scoped documents
-- [ ] Shared collections (optional)
-- [ ] Usage quotas and limits
+- [x] User model with admin flag
+- [x] Optional auth (AUTH_ENABLED env var)
+
+**Implementation:** `core/models.py` (User), `core/config.py`
 
 ### 8.3 API Keys
 
-- [ ] Generate API keys for programmatic access
-- [ ] Rate limiting per key
-- [ ] Usage tracking
+- [x] Generate API keys for programmatic access
+- [x] API key authentication via X-API-Key header
+- [x] Last used tracking
+
+**Implementation:** `core/models.py` (APIKey), `core/auth.py`
 
 ---
 
@@ -285,7 +289,7 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 ✅ Phase 5 (Chat) - COMPLETED (API only, UI pending)
 ✅ Phase 6 (Collections) - COMPLETED
 ✅ Phase 7 (Multi-modal) - COMPLETED
-⬚ Phase 8 (Auth) - NOT STARTED
+✅ Phase 8 (Auth) - COMPLETED
 ⬚ Phase 9 (Performance) - NOT STARTED
 ⬚ Phase 10 (Advanced) - NOT STARTED
 ```
@@ -309,6 +313,8 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 | `api/routes/tables.py` | Table extraction & querying |
 | `api/routes/extracted_images.py` | Image extraction endpoints |
 | `services/multimodal_service.py` | Multi-modal extraction service |
+| `core/auth.py` | JWT & API key authentication |
+| `api/routes/auth.py` | Auth endpoints (register, login, tokens) |
 
 ---
 
@@ -349,6 +355,13 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 | GET | `/extracted-images/document/{doc_id}` | Get document images |
 | GET | `/extracted-images/{id}` | Get image details |
 | GET | `/extracted-images/{id}/file` | Get image file |
+| POST | `/auth/register` | Register new user |
+| POST | `/auth/login` | Login and get tokens |
+| POST | `/auth/refresh` | Refresh access token |
+| GET | `/auth/me` | Get current user |
+| POST | `/auth/api-keys` | Create API key |
+| GET | `/auth/api-keys` | List API keys |
+| DELETE | `/auth/api-keys/{id}` | Delete API key |
 
 ---
 

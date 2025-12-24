@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter
 
+from .auth import router as auth_router
 from .chat import router as chat_router
 from .chunks import router as chunks_router
 from .collections import router as collections_router
@@ -16,6 +17,7 @@ from .tags import router as tags_router
 
 router = APIRouter()
 
+router.include_router(auth_router)
 router.include_router(documents_router)
 router.include_router(images_router)
 router.include_router(health_router)
