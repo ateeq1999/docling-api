@@ -249,3 +249,85 @@ class DocumentTag(Base):
 
     document: Mapped["Document"] = relationship("Document")
     tag: Mapped["Tag"] = relationship("Tag", back_populates="documents")
+
+
+class ExtractedTable(Base):
+    """Extracted table from a document."""
+
+    __tablename__ = "extracted_tables"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    document_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("documents.id", ondelete="CASCADE"), nullable=False
+    )
+    table_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    page_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    num_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    num_cols: Mapped[int] = mapped_column(Integer, nullable=False)
+    caption: Mapped[str | None] = mapped_column(Text, nullable=True)
+    markdown_content: Mapped[str] = mapped_column(Text, nullable=False)
+    html_content: Mapped[str | None] = mapped_column(Text, nullable=True)
+    csv_content: Mapped[str | None] = mapped_column(Text, nullable=True)
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    has_embedding: Mapped[bool] = mapped_column(Integer, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+    document: Mapped["Document"] = relationship("Document")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "document_id": self.document_id,
+            "table_index": self.table_index,
+            "page_number": self.page_number,
+            "num_rows": self.num_rows,
+            "num_cols": self.num_cols,
+            "caption": self.caption,
+            "markdown_content": self.markdown_content,
+            "summary": self.summary,
+            "has_embedding": bool(self.has_embedding),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class ExtractedImage(Base):
+    """Extracted image from a document."""
+
+    __tablename__ = "extracted_images"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    document_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("documents.id", ondelete="CASCADE"), nullable=False
+    )
+    image_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    page_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    image_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    width: Mapped[int] = mapped_column(Integer, nullable=False)
+    height: Mapped[int] = mapped_column(Integer, nullable=False)
+    file_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    caption: Mapped[str | None] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    has_embedding: Mapped[bool] = mapped_column(Integer, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+    document: Mapped["Document"] = relationship("Document")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "document_id": self.document_id,
+            "image_index": self.image_index,
+            "page_number": self.page_number,
+            "image_type": self.image_type,
+            "width": self.width,
+            "height": self.height,
+            "file_path": self.file_path,
+            "caption": self.caption,
+            "description": self.description,
+            "has_embedding": bool(self.has_embedding),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }

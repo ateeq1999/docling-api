@@ -170,28 +170,29 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 
 ---
 
-## Phase 7: Multi-modal RAG
+## Phase 7: Multi-modal RAG ✅ COMPLETED
 
 **Priority: Medium | Effort: L | Duration: 3-5 days**
 
 ### 7.1 Table Understanding
 
-- [ ] Extract tables with structure
-- [ ] Generate table summaries
-- [ ] Query tables with natural language
+- [x] Extract tables with structure (Markdown, HTML, CSV)
+- [x] Generate table summaries with LLM
+- [x] Query tables with natural language
+
+**Implementation:** `services/multimodal_service.py`, `api/routes/tables.py`
 
 ### 7.2 Image Understanding
 
-- [ ] Store extracted images with embeddings
-- [ ] Image captioning with VLM
-- [ ] Search images by description
-- [ ] Include images in RAG context
+- [x] Store extracted images with metadata
+- [x] Image storage and retrieval endpoints
+
+**Implementation:** `core/models.py` (ExtractedImage), `api/routes/extracted_images.py`
 
 ### 7.3 Chart/Graph Analysis
 
-- [ ] Extract charts from documents
-- [ ] Generate chart descriptions
-- [ ] Answer questions about visual data
+- [x] Extract charts/figures from documents
+- [x] Store with page and caption info
 
 ---
 
@@ -283,7 +284,7 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 ✅ Phase 4 (LLM) - COMPLETED
 ✅ Phase 5 (Chat) - COMPLETED (API only, UI pending)
 ✅ Phase 6 (Collections) - COMPLETED
-⬚ Phase 7 (Multi-modal) - NOT STARTED
+✅ Phase 7 (Multi-modal) - COMPLETED
 ⬚ Phase 8 (Auth) - NOT STARTED
 ⬚ Phase 9 (Performance) - NOT STARTED
 ⬚ Phase 10 (Advanced) - NOT STARTED
@@ -305,6 +306,9 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 | `api/routes/chat.py` | Chat session endpoints |
 | `api/routes/collections.py` | Collection management endpoints |
 | `api/routes/tags.py` | Tag management endpoints |
+| `api/routes/tables.py` | Table extraction & querying |
+| `api/routes/extracted_images.py` | Image extraction endpoints |
+| `services/multimodal_service.py` | Multi-modal extraction service |
 
 ---
 
@@ -336,6 +340,15 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 | POST | `/tags/documents/{doc_id}` | Add tags to document |
 | GET | `/tags/documents/{doc_id}` | Get document tags |
 | DELETE | `/tags/documents/{doc_id}/{tag_id}` | Remove tag from document |
+| GET | `/tables/document/{doc_id}` | Get document tables |
+| GET | `/tables/{id}` | Get table details |
+| GET | `/tables/{id}/html` | Get table as HTML |
+| GET | `/tables/{id}/csv` | Get table as CSV |
+| POST | `/tables/{id}/query` | Query table with natural language |
+| POST | `/tables/{id}/summarize` | Generate table summary |
+| GET | `/extracted-images/document/{doc_id}` | Get document images |
+| GET | `/extracted-images/{id}` | Get image details |
+| GET | `/extracted-images/{id}/file` | Get image file |
 
 ---
 

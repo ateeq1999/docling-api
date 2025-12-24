@@ -18,6 +18,7 @@ from services.docling_service import (
     process_document_stream,
 )
 from services.history_service import get_file_type, save_document_record
+from services.multimodal_service import process_images, process_tables
 from services.rag_service import process_and_embed_document
 
 router = APIRouter(
@@ -201,6 +202,9 @@ async def ingest_document(
             document_id=doc_record.id,
             document=document,
         )
+
+        await process_tables(db=db, document_id=doc_record.id, document=document)
+        await process_images(db=db, document_id=doc_record.id, document=document)
 
         return ProcessWithChunkingResponse(
             document_id=doc_record.id,
