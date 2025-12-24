@@ -14,10 +14,12 @@ from .images import router as images_router
 from .search import router as search_router
 from .tables import router as tables_router
 from .tags import router as tags_router
+from .admin import router as admin_router
 
 router = APIRouter()
 
 router.include_router(auth_router)
+router.include_router(admin_router)
 router.include_router(documents_router)
 router.include_router(images_router)
 router.include_router(health_router)

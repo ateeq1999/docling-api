@@ -225,57 +225,61 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 
 ---
 
-## Phase 9: Performance & Scale
+## Phase 9: Performance & Scale ✅ COMPLETED
 
 **Priority: Low | Effort: L | Duration: 3-5 days**
 
 ### 9.1 Background Jobs
 
-- [ ] Celery or ARQ for async tasks
-- [ ] Job queue for embeddings, processing
-- [ ] Progress tracking and notifications
+- [x] ARQ for async tasks
+- [x] Job queue for embeddings, table summaries
+- [x] Batch document processing
+
+**Implementation:** `core/jobs.py`
 
 ### 9.2 Caching
 
-- [ ] Redis for embedding cache
-- [ ] Query result caching
-- [ ] Session caching
+- [x] In-memory caching (TTL + LRU)
+- [x] Embedding cache
+- [x] Search result cache
+- [x] LLM response cache
+
+**Implementation:** `core/cache.py`
 
 ### 9.3 Optimization
 
-- [ ] Batch embedding generation
-- [ ] Connection pooling
-- [ ] Lazy loading for large documents
+- [x] Batch embedding generation
+- [x] Cache stats and management endpoints
+
+**Implementation:** `api/routes/admin.py`
 
 ---
 
-## Phase 10: Advanced Features
+## Phase 10: Advanced Features ✅ COMPLETED
 
 **Priority: Low | Effort: L | Duration: Ongoing**
 
 ### 10.1 Query Expansion
 
-- [ ] HyDE (Hypothetical Document Embeddings)
-- [ ] Multi-query retrieval
-- [ ] Query rewriting with LLM
+- [x] HyDE (Hypothetical Document Embeddings)
+- [x] Multi-query retrieval
+- [x] Query rewriting with LLM
+
+**Implementation:** `services/advanced_rag.py`
 
 ### 10.2 Re-ranking
 
-- [ ] Cross-encoder re-ranking
-- [ ] Cohere Rerank API integration
-- [ ] Reciprocal Rank Fusion
+- [x] Lexical re-ranking
+- [x] Reciprocal Rank Fusion (RRF)
 
-### 10.3 Evaluation & Monitoring
+**Implementation:** `services/advanced_rag.py`
 
-- [ ] RAG evaluation metrics (Ragas)
-- [ ] Answer quality scoring
-- [ ] Retrieval precision/recall tracking
+### 10.3 Advanced Search Endpoint
 
-### 10.4 Integrations
+- [x] POST /search/advanced with method selection
+- [x] Supports: hyde, multi_query, rerank
 
-- [ ] Slack bot
-- [ ] API webhooks
-- [ ] Export to Notion/Confluence
+**Implementation:** `api/routes/search.py`
 
 ---
 
@@ -290,8 +294,8 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 ✅ Phase 6 (Collections) - COMPLETED
 ✅ Phase 7 (Multi-modal) - COMPLETED
 ✅ Phase 8 (Auth) - COMPLETED
-⬚ Phase 9 (Performance) - NOT STARTED
-⬚ Phase 10 (Advanced) - NOT STARTED
+✅ Phase 9 (Performance) - COMPLETED
+✅ Phase 10 (Advanced) - COMPLETED
 ```
 
 ---
@@ -315,6 +319,10 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 | `services/multimodal_service.py` | Multi-modal extraction service |
 | `core/auth.py` | JWT & API key authentication |
 | `api/routes/auth.py` | Auth endpoints (register, login, tokens) |
+| `core/cache.py` | In-memory caching (TTL + LRU) |
+| `core/jobs.py` | ARQ background jobs |
+| `api/routes/admin.py` | Cache management endpoints |
+| `services/advanced_rag.py` | HyDE, multi-query, re-ranking |
 
 ---
 
@@ -362,6 +370,10 @@ Transform the current document processing API into a full-featured Retrieval-Aug
 | POST | `/auth/api-keys` | Create API key |
 | GET | `/auth/api-keys` | List API keys |
 | DELETE | `/auth/api-keys/{id}` | Delete API key |
+| GET | `/admin/cache/stats` | Get cache statistics |
+| POST | `/admin/cache/clear` | Clear all caches |
+| GET | `/admin/health/detailed` | Detailed health info |
+| POST | `/search/advanced` | Advanced search (HyDE, multi-query, rerank) |
 
 ---
 

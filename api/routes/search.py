@@ -1,6 +1,9 @@
 """Semantic search endpoints."""
 
+from typing import Literal
+
 from fastapi import APIRouter, Depends, Header
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
@@ -80,5 +83,78 @@ async def ask(
                 page_number=s.page_number,
             )
             for s in response.sources
+        ],
+    )
+
+
+class AdvancedSearchRequest(BaseModel):
+    query: str
+    top_k: int = 5
+    document_ids: list[int] | None = None
+    method: Literal["hyde", "multi_query", "rerank"] = "hyde"
+    llm_provider: str = "openai"
+
+
+@router.post("/advanced", response_model=SearchResponse)
+async def advanced_search(
+    request: AdvancedSearchRequest,
+    db: AsyncSession = Depends(get_db),
+    x_openai_api_key: str | None = Header(None, alias="X-OpenAI-API-Key"),
+):
+    """
+    Advanced search with HyDE, multi-query, or re-ranking.
+    
+    Methods:
+    - hyde: Hypothetical Document Embeddings
+    - multi_query: Generate query variations and merge with RRF
+    - rerank: Standard search with lexical re-ranking
+    """
+    from services.advanced_rag import (
+        hyde_search,
+        multi_query_search,
+        rerank_results,
+    )
+
+    if request.method == "hyde":
+        results = await hyde_search(
+            db=db,
+            query=request.query,
+            top_k=request.top_k,
+            document_ids=request.document_ids,
+            llm_provider=request.llm_provider,
+            api_key=x_openai_api_key,
+        )
+    elif request.method == "multi_query":
+        results = await multi_query_search(
+            db=db,
+            query=request.query,
+            top_k=request.top_k,
+            document_ids=request.document_ids,
+            llm_provider=request.llm_provider,
+            api_key=x_openai_api_key,
+        )
+    else:
+        rag = RAGService(db)
+        base_results = await rag.search(
+            query=request.query,
+            top_k=request.top_k * 2,
+            document_ids=request.document_ids,
+        )
+        ranked = rerank_results(request.query, base_results)
+        results = [r.result for r in ranked[:request.top_k]]
+
+    return SearchResponse(
+        query=request.query,
+        results=[
+            SearchResultItem(
+                chunk_id=r.chunk_id,
+                document_id=r.document_id,
+                filename=r.filename,
+                content=r.content,
+                score=r.score,
+                page_number=r.page_number,
+                section_title=r.section_title,
+            )
+            for r in results
         ],
     )
