@@ -70,6 +70,7 @@ dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "python-multipart" },
     { name = "ruff" },
+    { name = "uvicorn" },
 ]
 
 [package.metadata]
@@ -78,6 +79,7 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.127.0" },
     { name = "python-multipart", specifier = ">=0.0.21" },
     { name = "ruff", specifier = ">=0.14.10" },
+    { name = "uvicorn", specifier = ">=0.40.0" },
 ]
 
 [[package]]
