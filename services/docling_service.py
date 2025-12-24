@@ -2,12 +2,12 @@ import asyncio
 import json
 import tempfile
 from pathlib import Path
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Tuple
 
 from fastapi import UploadFile, HTTPException
 from docling.document_converter import DocumentConverter
 
-from app.core.config import MAX_FILE_SIZE_BYTES
+from core.config import MAX_FILE_SIZE_BYTES
 
 
 # -------------------------
@@ -16,14 +16,14 @@ from app.core.config import MAX_FILE_SIZE_BYTES
 
 async def validate_file_size(file: UploadFile) -> None:
     size = 0
-    chunk_size = 1024 * 1024
+    chunk = 1024 * 1024
 
-    while chunk := await file.read(chunk_size):
-        size += len(chunk)
+    while data := await file.read(chunk):
+        size += len(data)
         if size > MAX_FILE_SIZE_BYTES:
             raise HTTPException(
                 status_code=413,
-                detail="Uploaded file exceeds size limit",
+                detail="File too large",
             )
 
     await file.seek(0)
@@ -48,7 +48,7 @@ def _convert(path: Path, output_format: str) -> str:
         data = doc.export_to_json()
         return json.dumps(data) if not isinstance(data, str) else data
 
-    raise ValueError("Unsupported output format")
+    raise ValueError("Unsupported format")
 
 
 # -------------------------
@@ -56,28 +56,28 @@ def _convert(path: Path, output_format: str) -> str:
 # -------------------------
 
 async def stream_text(content: str) -> AsyncGenerator[bytes, None]:
-    chunk = 2048
-    for i in range(0, len(content), chunk):
-        yield content[i : i + chunk].encode()
+    size = 2048
+    for i in range(0, len(content), size):
+        yield content[i : i + size].encode()
         await asyncio.sleep(0)
 
 
 # -------------------------
-# Public service API
+# Non-streaming API
 # -------------------------
 
-async def process_document_stream(
+async def process_document(
     file: UploadFile,
     output_format: str,
-):
+) -> Tuple[str, str]:
     """
-    Accepts ANY input Docling can handle (docs, images, binaries).
+    Returns full content (non-streaming)
     """
 
     await validate_file_size(file)
 
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        tmp_path = Path(tmp.name)
+        path = Path(tmp.name)
 
         try:
             while chunk := await file.read(1024 * 1024):
@@ -85,7 +85,7 @@ async def process_document_stream(
 
             content = await asyncio.to_thread(
                 _convert,
-                tmp_path,
+                path,
                 output_format,
             )
 
@@ -95,10 +95,27 @@ async def process_document_stream(
                 else "text/plain"
             )
 
-            return stream_text(content), media_type
+            return content, media_type
 
         finally:
-            try:
-                tmp_path.unlink(missing_ok=True)
-            except Exception:
-                pass
+            path.unlink(missing_ok=True)
+
+
+# -------------------------
+# Streaming API
+# -------------------------
+
+async def process_document_stream(
+    file: UploadFile,
+    output_format: str,
+) -> Tuple[AsyncGenerator[bytes, None], str]:
+    """
+    Streams content progressively
+    """
+
+    content, media_type = await process_document(
+        file=file,
+        output_format=output_format,
+    )
+
+    return stream_text(content), media_type
