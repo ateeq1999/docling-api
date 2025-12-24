@@ -1,6 +1,8 @@
-def main():
-    print("Hello from api-docs-1!")
+from fastapi import FastAPI
+
+app = FastAPI()
 
 
-if __name__ == "__main__":
-    main()
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
