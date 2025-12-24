@@ -2,17 +2,20 @@
 
 import json
 import logging
+import warnings
 from enum import Enum
 from pathlib import Path
 from typing import Any
 
 from docling.datamodel.accelerator_options import AcceleratorDevice, AcceleratorOptions
 from docling.datamodel.base_models import InputFormat
-from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling.datamodel.pipeline_options import PdfPipelineOptions, RapidOcrOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling.exceptions import ConversionError
 
 from core.config import NUM_THREADS, OCR_ENABLED, OCR_LANGUAGES
+
+warnings.filterwarnings("ignore", message=".*pin_memory.*")
 
 logger = logging.getLogger("docling_api")
 
@@ -50,7 +53,10 @@ def create_converter() -> DocumentConverter:
     )
 
     if OCR_ENABLED:
-        pipeline_options.ocr_options.lang = OCR_LANGUAGES
+        pipeline_options.ocr_options = RapidOcrOptions(
+            lang=OCR_LANGUAGES,
+            use_gpu=False,
+        )
 
     return DocumentConverter(
         format_options={
