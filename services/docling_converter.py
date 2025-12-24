@@ -9,7 +9,7 @@ from typing import Any
 
 from docling.datamodel.accelerator_options import AcceleratorDevice, AcceleratorOptions
 from docling.datamodel.base_models import InputFormat
-from docling.datamodel.pipeline_options import PdfPipelineOptions, RapidOcrOptions
+from docling.datamodel.pipeline_options import EasyOcrOptions, PdfPipelineOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling.exceptions import ConversionError
 
@@ -53,9 +53,11 @@ def create_converter() -> DocumentConverter:
     )
 
     if OCR_ENABLED:
-        pipeline_options.ocr_options = RapidOcrOptions(
+        pipeline_options.ocr_options = EasyOcrOptions(
             lang=OCR_LANGUAGES,
-            backend="torch",
+            use_gpu=False,
+            bitmap_area_threshold=0.0,
+            force_full_page_ocr=True,
         )
 
     return DocumentConverter(
