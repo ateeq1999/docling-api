@@ -29,94 +29,23 @@ h2 {
   padding-bottom: 8px;
 }
 
-section {
+.extras-section {
   background: #16213e;
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 20px;
 }
 
-.health-section {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.health-btn {
-  background: #0f3460;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.health-btn:hover {
-  background: #1a4a7a;
-}
-
-.health-status {
-  color: #4ade80;
-  font-size: 0.9rem;
-}
-
-.upload-section input[type="file"] {
-  margin-bottom: 15px;
-}
-
-.file-name {
-  display: inline-block;
-  margin-left: 10px;
-  color: #888;
-  font-size: 0.9rem;
-}
-
-.format-select {
-  margin: 15px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.format-select label {
-  color: #aaa;
-}
-
-.format-select select {
-  background: #0f3460;
-  color: #fff;
-  border: 1px solid #333;
-  padding: 8px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
 .button-group {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 15px;
 }
 
-button {
-  background: #e94560;
-  color: #fff;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: background 0.2s;
-}
-
-button:hover:not(:disabled) {
-  background: #ff6b6b;
-}
-
-button:disabled {
-  background: #444;
-  color: #888;
-  cursor: not-allowed;
+.hint {
+  color: #666;
+  font-size: 0.85rem;
+  margin-top: 10px;
 }
 
 .loading {
@@ -124,49 +53,4 @@ button:disabled {
   padding: 20px;
   color: #fbbf24;
   font-size: 1.1rem;
-}
-
-.error {
-  background: #7f1d1d;
-  color: #fecaca;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-.result-section {
-  background: #0f172a;
-}
-
-.result {
-  background: #020617;
-  padding: 20px;
-  border-radius: 8px;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-family: "Fira Code", "Consolas", monospace;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  max-height: 500px;
-  overflow-y: auto;
-  color: #e2e8f0;
-}
-
-input[type="file"] {
-  color: #aaa;
-}
-
-input[type="file"]::file-selector-button {
-  background: #0f3460;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-right: 10px;
-}
-
-input[type="file"]::file-selector-button:hover {
-  background: #1a4a7a;
 }

@@ -1,0 +1,96 @@
+.section {
+  background: #16213e;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.section h2 {
+  color: #aaa;
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 8px;
+}
+
+.fileInput {
+  margin-bottom: 15px;
+  color: #aaa;
+}
+
+.fileInput::file-selector-button {
+  background: #0f3460;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.fileInput::file-selector-button:hover {
+  background: #1a4a7a;
+}
+
+.fileName {
+  display: inline-block;
+  margin-left: 10px;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.formatSelect {
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.formatSelect label {
+  color: #aaa;
+}
+
+.select {
+  background: #0f3460;
+  color: #fff;
+  border: 1px solid #333;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.button {
+  background: #e94560;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.button:hover:not(:disabled) {
+  background: #ff6b6b;
+}
+
+.button:disabled {
+  background: #444;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.error {
+  background: #7f1d1d;
+  color: #fecaca;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+}

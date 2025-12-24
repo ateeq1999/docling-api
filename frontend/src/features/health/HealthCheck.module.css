@@ -1,0 +1,32 @@
+.section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #16213e;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.button {
+  background: #0f3460;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  background: #1a4a7a;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.status {
+  color: #4ade80;
+  font-size: 0.9rem;
+}
