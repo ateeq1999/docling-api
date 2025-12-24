@@ -6,12 +6,13 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from docling.datamodel.accelerator_options import AcceleratorDevice, AcceleratorOptions
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PdfPipelineOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling.exceptions import ConversionError
 
-from core.config import OCR_ENABLED, OCR_LANGUAGES
+from core.config import NUM_THREADS, OCR_ENABLED, OCR_LANGUAGES
 
 logger = logging.getLogger("docling_api")
 
@@ -42,6 +43,11 @@ def create_converter() -> DocumentConverter:
     pipeline_options.do_ocr = OCR_ENABLED
     pipeline_options.do_table_structure = True
     pipeline_options.table_structure_options.do_cell_matching = True
+
+    pipeline_options.accelerator_options = AcceleratorOptions(
+        num_threads=NUM_THREADS,
+        device=AcceleratorDevice.CPU,
+    )
 
     if OCR_ENABLED:
         pipeline_options.ocr_options.lang = OCR_LANGUAGES
