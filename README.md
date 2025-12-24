@@ -24,7 +24,7 @@ Start the server:
 uv run uvicorn main:app --reload
 ```
 
-API documentation available at: http://localhost:8000/docs
+API documentation available at: <http://localhost:8000/docs>
 
 ## API Endpoints
 
@@ -80,8 +80,19 @@ Environment variables:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `MAX_FILE_SIZE_MB` | `50` | Maximum upload file size in MB |
-| `DOCLING_OCR_BACKEND` | `tesseract` | OCR backend |
-| `DOCLING_OCR_LANGS` | `eng` | OCR languages |
+| `DOCLING_OCR_ENABLED` | `true` | Enable/disable OCR |
+| `DOCLING_OCR_LANGS` | `en` | OCR languages (comma-separated) |
+| `OMP_NUM_THREADS` | `4` | CPU threads for processing |
+
+### OCR Notes
+
+Docling auto-selects the best available OCR engine:
+
+- **RapidOCR** (default): Works out of the box with PyTorch
+- **EasyOCR**: Install with `uv add easyocr`
+- **Tesseract**: Requires system installation
+
+The "RapidOCR returned empty result" warnings are normal for pages without scanned text.
 
 ## License
 
