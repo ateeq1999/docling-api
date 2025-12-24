@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from docling.document_converter import DocumentConverter, ConverterConfig
+# from docling.document_converter import ConverterConfig
 from pathlib import Path
 import os
 import shutil
