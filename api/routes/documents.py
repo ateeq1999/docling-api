@@ -7,9 +7,10 @@ from fastapi.responses import Response, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
-from core.schemas import BulkDocumentResult
+from core.schemas import BulkDocumentResult, ProcessWithChunkingResponse
 from services.docling_converter import OutputFormat
 from services.docling_service import (
+    load_document,
     process_bulk_documents,
     process_document,
     process_document_per_page_stream,
@@ -17,6 +18,7 @@ from services.docling_service import (
     process_document_stream,
 )
 from services.history_service import get_file_type, save_document_record
+from services.rag_service import process_and_embed_document
 
 router = APIRouter(
     prefix="/documents",
@@ -166,3 +168,56 @@ async def process_bulk(
         )
 
     return await process_bulk_documents(files, format)
+
+
+@router.post("/ingest", response_model=ProcessWithChunkingResponse)
+async def ingest_document(
+    file: UploadFile,
+    db: AsyncSession = Depends(get_db),
+):
+    """Ingest a document: process, chunk, and generate embeddings for RAG."""
+    start_time = time.time()
+
+    file_content = await file.read()
+    file_size = len(file_content)
+    await file.seek(0)
+
+    try:
+        document = await load_document(file)
+        processing_time = int((time.time() - start_time) * 1000)
+
+        doc_record = await save_document_record(
+            db=db,
+            filename=file.filename or "unknown",
+            file_size=file_size,
+            file_type=get_file_type(file.filename or ""),
+            output_format="chunks",
+            status="success",
+            processing_time_ms=processing_time,
+        )
+
+        chunk_count = await process_and_embed_document(
+            db=db,
+            document_id=doc_record.id,
+            document=document,
+        )
+
+        return ProcessWithChunkingResponse(
+            document_id=doc_record.id,
+            filename=file.filename or "unknown",
+            chunk_count=chunk_count,
+            status="success",
+        )
+    except Exception as e:
+        processing_time = int((time.time() - start_time) * 1000)
+        await save_document_record(
+            db=db,
+            filename=file.filename or "unknown",
+            file_size=file_size,
+            file_type=get_file_type(file.filename or ""),
+            output_format="chunks",
+            status="error",
+            processing_time_ms=processing_time,
+            error_message=str(e),
+        )
+        raise
