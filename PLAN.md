@@ -67,12 +67,20 @@ class Chunk(Base):
 
 ### 2.2 Vector Database
 
-- [ ] **Option A**: ChromaDB (simple, file-based, good for dev)
-- [ ] **Option B**: Qdrant (production-ready, Docker)
-- [ ] **Option C**: PostgreSQL + pgvector (if using Postgres)
+- [ ] **Option A**: SQLite + sqlite-vec (simplest, reuses existing DB)
+- [ ] **Option B**: ChromaDB (simple, file-based, good for dev)
+- [ ] **Option C**: Qdrant (production-ready, Docker)
+- [ ] **Option D**: PostgreSQL + pgvector (if using Postgres)
+
+> **Recommended for dev**: SQLite + sqlite-vec
+> - Zero additional infrastructure (reuses `docling.db`)
+> - Pure Python, works on Windows/Mac/Linux
+> - Good for < 100k vectors
+> - Easy migration to production DBs later
+> - Install: `uv add sqlite-vec`
 
 ```python
-# Recommended: ChromaDB for simplicity
+# Option A: SQLite with sqlite-vec
 # core/vector_store.py
 class VectorStore:
     async def add_chunks(chunks: list[Chunk], embeddings: list[list[float]])
@@ -374,30 +382,72 @@ Week 4+: Phases 7-10 (Advanced features)
 
 ## Tech Stack Recommendations
 
-| Component | Recommended | Alternative |
-|-----------|-------------|-------------|
-| Vector DB | ChromaDB | Qdrant, pgvector |
-| Embeddings | BGE-small-en | Cohere, Mistral AI, OpenAI |
-| LLM (Local) | Ollama + Llama3 | vLLM, LM Studio |
-| LLM (API) | OpenAI GPT-4o-mini | Claude 3 Haiku, Mistral AI |
-| Job Queue | ARQ (async) | Celery |
-| Cache | Redis | In-memory |
-| Search | Hybrid (vector + BM25) | Vector only |
+| Component | Dev (Simple) | Production |
+|-----------|--------------|------------|
+| Vector DB | SQLite + sqlite-vec | Qdrant, pgvector |
+| Embeddings | sentence-transformers | OpenAI, Cohere |
+| LLM (Local) | Ollama + Llama3 | vLLM, TGI |
+| LLM (API) | OpenAI GPT-4o-mini | Claude 3.5, GPT-4o |
+| Job Queue | In-process / ARQ | Celery + Redis |
+| Cache | In-memory | Redis |
+| Search | Vector only | Hybrid (vector + BM25) |
+| Database | SQLite | PostgreSQL |
 
 ---
 
 ## Quick Start: Minimal RAG (Phase 1-4)
 
 ```bash
-# Install dependencies
+# Install dependencies (dev - SQLite vector)
+uv add sqlite-vec sentence-transformers openai
+
+# Or with ChromaDB
 uv add chromadb sentence-transformers openai
 
 # New files to create
 core/embeddings.py      # Embedding generation
-core/vector_store.py    # ChromaDB wrapper
+core/vector_store.py    # SQLite-vec or ChromaDB wrapper
+services/chunking.py    # Document chunking
 services/rag_service.py # RAG pipeline
 api/routes/search.py    # Search endpoints
 api/routes/chat.py      # Chat endpoints
+```
+
+### SQLite Vector Store Example
+
+```python
+# core/vector_store.py
+import sqlite_vec
+from sqlite3 import connect
+
+class SQLiteVectorStore:
+    def __init__(self, db_path: str = "docling.db"):
+        self.conn = connect(db_path)
+        self.conn.enable_load_extension(True)
+        sqlite_vec.load(self.conn)
+        self._init_tables()
+    
+    def _init_tables(self):
+        self.conn.execute("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS vec_chunks 
+            USING vec0(embedding float[384])
+        """)
+    
+    def add(self, chunk_id: int, embedding: list[float]):
+        self.conn.execute(
+            "INSERT INTO vec_chunks(rowid, embedding) VALUES (?, ?)",
+            (chunk_id, embedding)
+        )
+        self.conn.commit()
+    
+    def search(self, query_embedding: list[float], top_k: int = 5):
+        return self.conn.execute("""
+            SELECT rowid, distance 
+            FROM vec_chunks 
+            WHERE embedding MATCH ? 
+            ORDER BY distance 
+            LIMIT ?
+        """, (query_embedding, top_k)).fetchall()
 ```
 
 ---
