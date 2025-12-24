@@ -68,6 +68,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "docling" },
     { name = "fastapi", extra = ["standard"] },
+    { name = "pillow" },
     { name = "python-multipart" },
     { name = "ruff" },
     { name = "torch" },
@@ -79,6 +80,7 @@ dependencies = [
 requires-dist = [
     { name = "docling", specifier = ">=2.66.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.127.0" },
+    { name = "pillow", specifier = ">=11.3.0" },
     { name = "python-multipart", specifier = ">=0.0.21" },
     { name = "ruff", specifier = ">=0.14.10" },
     { name = "torch", specifier = ">=2.9.1" },
